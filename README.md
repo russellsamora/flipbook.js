@@ -29,3 +29,7 @@ Scroll-based inline flipbook animation for the internet. Checkout the [demo](htt
 
 
 Inspired by [canvid](https://github.com/gka/canvid/blob/master/canvid.js) and [stack](https://github.com/mbostock/stack)
+
+## License
+
+MIT © [Russell Goldenberg](http://russellgoldenberg.com)
