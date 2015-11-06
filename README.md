@@ -1,6 +1,6 @@
 # flipbook.js
 
-Scroll-based inline flipbook animation for the internet. Checkout the [demo](https://russellgoldenberg.github.io/flipbook.js/demo).
+Scroll-based inline flipbook animation for the internet. Checkout the [demo](https://russellgoldenberg.github.io/flipbook.js).
 
 ## Usage
 
