@@ -11,7 +11,11 @@
     "url": "https://github.com/russellgoldenberg/flipbook.js"
   },
   "keywords": [
-    "flipbook"
+    "flipbook",
+    "canvas",
+    "scroll",
+    "animation",
+    "sequence"
   ],
   "author": "russell goldenberg",
   "license": "MIT",
