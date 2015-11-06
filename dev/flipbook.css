@@ -1,0 +1,14 @@
+.flip-container {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+	border: 2px dashed rgba(0,255,255,1); /*debug*/
+}
+
+.flip-graphic {
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: rgba(255,0,0,0.3); /*debug*/
+}
