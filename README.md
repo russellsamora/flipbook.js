@@ -21,7 +21,7 @@ or
 	<script>
 		// instantiate the flipbook
 		flipbook({
-			id: 'flip-walk',
+			id: 'walk-cycle',
 			path: 'frames/walk',
 			extension: 'jpg',
 			frames: 86,
