@@ -2,13 +2,21 @@
 
 Scroll-based inline flipbook animation for the internet. Checkout the [demo](https://russellgoldenberg.github.io/flipbook.js).
 
+
+## Installation
+
+``` npm install flipbook```
+
+or 
+
+``` <script src="flipbook.min.js"></script> ```
+
+
+
 ## Usage
 
 ``` html
 	<div id='walk-cycle'></div>
-
-	// include the flipbook library
-	<script src='flipbook.js'></script>
 
 	<script>
 		// instantiate the flipbook
@@ -28,8 +36,8 @@ Scroll-based inline flipbook animation for the internet. Checkout the [demo](htt
 ```ffmpeg -i input.mp4 -r 12 frames/%d.png ```
 
 
-Inspired by [canvid](https://github.com/gka/canvid/blob/master/canvid.js) and [stack](https://github.com/mbostock/stack)
-
-## License
+## License & Credit
 
 MIT © [Russell Goldenberg](http://russellgoldenberg.com)
+
+Inspired by [canvid](https://github.com/gka/canvid/blob/master/canvid.js) and [stack](https://github.com/mbostock/stack)
