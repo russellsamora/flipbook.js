@@ -83,12 +83,10 @@
                 'background': '#efefef'
             });
 
-
             setStyles(_graphic, {
-                'width': '100%',
                 'position': 'absolute',
                 'top': 0,
-                'left': 0,
+                'left': 0
             });
 
             setStyles(_canvas, {
@@ -111,13 +109,6 @@
                     src: params.path + '/' + (i + 1) + '.' + params.extension
                 };
             }
-
-            // var q = queue(1);
-            // _frames.forEach(function(f) {
-            //     q.defer(loadImage, f);
-            // });
-            
-            // q.awaitAll(cb);
 
             var loadNext = function(index) {
                 var f = _frames[index];
@@ -150,10 +141,9 @@
         var onResize = function() {
             
             /*** update graphic ***/
-            
-            _canvasHeight = Math.floor(_graphic.offsetWidth / params.aspectRatio);
+            _canvasWidth = _container.offsetWidth;
+            _canvasHeight = Math.floor(_canvasWidth / params.aspectRatio);
             var canvasMargin = innerHeight - _canvasHeight; // total margin top + bottom of canvas
-            _canvasWidth = _graphic.offsetWidth;
             _graphicH = _canvasHeight + canvasMargin;
 
             // canvas resize
@@ -165,6 +155,7 @@
 
             // graphic resize
             _graphic.style.height = _graphicH + 'px';
+            _graphic.style.width = _canvasWidth + 'px';
 
             
 
@@ -184,17 +175,16 @@
 
             // grab updated dimensions
             var containerBB = _container.getBoundingClientRect();
-            var graphicBB = _graphic.getBoundingClientRect();
-
 
             // get value from edge of screen to keep in same place when fixed
-            _graphicLeft = graphicBB.left + 'px';
+            _graphicLeft = containerBB.left;
 
             // scroll pos values where graphic should start and stop
             _start = containerBB.top + pageYOffset;
             _end = containerBB.bottom + pageYOffset - _graphic.offsetHeight;
 
             updateScroll();
+            updateFrame(pageYOffset - _start, true); // force redraw
         };
 
         var onScroll = function() {
@@ -210,20 +200,20 @@
 
         var updateScroll = function() {
             _ticking = false;
-            if(_ready) {
+            if (_ready) {
                 var top = pageYOffset - _start;
                 var bottom = pageYOffset - _end;
 
                 // TODO optimize
-                if(top > 0 && bottom < 0) {
+                if (top > 0 && bottom < 0) {
                     // we're in
                     setStyles(_graphic, {
                         'position': 'fixed',
                         'top': 0,
-                        'left': _graphicLeft,
+                        'left': _graphicLeft + 'px',
                         'bottom': 'auto'
                     });
-                    
+
                     updateFrame(top);
 
                 } else if (bottom > 0) {
@@ -235,6 +225,8 @@
                         'bottom': 0
                     });
 
+                    updateFrame(_containerH);
+
                 } else if(top < 0) {
                     // above
                     setStyles(_graphic, {
@@ -243,6 +235,8 @@
                         'left': 0,
                         'bottom': 'auto'
                     });
+
+                    updateFrame(0);
                     
                 } else {
                     // panic
@@ -250,11 +244,15 @@
             }
         };
 
-        var updateFrame = function(top) {
+        var updateFrame = function(top, redraw) {
             var percent = top / (_containerH - _graphicH);
-            var index = Math.floor(percent * params.frames);
+            
+            // constrain to a real percent
+            percent = Math.min(Math.max(percent, 0), 1);
+            
+            var index = Math.floor(percent * (params.frames - 1));
 
-            if(_previousFrame !== index) {
+            if(redraw || _previousFrame !== index) {
                 _previousFrame = index;
                 drawFrame(index);
             }
