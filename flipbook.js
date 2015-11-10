@@ -19,6 +19,7 @@
         var _canvas;
         var _ctx;
         var _loader;
+        var _progress;
 
         // position
         var _canvasWidth;
@@ -79,16 +80,26 @@
         var setupDom = function() {
             // get container
             _container = document.getElementById(params.id);
-            _container.classList.add('flip-container');
+            _container.classList.add('flipbook-container');
 
             _loader = document.createElement('div');
-            _loader.innerText = 'Loading animation...';
-            _loader.classList.add('flip-loader');
+            _loader.classList.add('flipbook-loader');
+            _progress = document.createElement('div');
+            _progress.classList.add('flipbook-loader--progress');
+            
+            var text = document.createElement('div');
+            text.classList.add('flipbook-loader--text');
+            text.innerText = 'Loading animation...';
+            setStyles(text, {'position': 'relative'});
+
+            _loader.appendChild(_progress);
+            _loader.appendChild(text);
+
             _container.appendChild(_loader);
                 
             // create graphic container / canvas for drawing
             _graphic = document.createElement('div');
-            _graphic.classList.add('flip-graphic');
+            _graphic.classList.add('flipbook-graphic');
             _container.appendChild(_graphic);
             _canvas = createCanvas(_graphic);
             _ctx = _canvas.getContext('2d');
@@ -102,11 +113,22 @@
             });
 
             setStyles(_loader, {
+                'position': 'relative',
                 'text-align': 'center',
                 'padding': '1em',
                 'font-family': 'sans-serif',
                 'color': '#666',
                 'background': '#efefef'
+            });
+
+            setStyles(_progress, {
+                'position': 'absolute',
+                'z-index': 0,
+                'top': 0,
+                'left': 0,
+                'width': 0,
+                'height': '100%',
+                'background': '#ddd'
             });
 
             setStyles(_graphic, {
@@ -149,6 +171,11 @@
                             params.aspectRatio = Math.round(img.naturalWidth / img.naturalHeight * 1000) / 1000;
                         }
 
+                        // progress update
+                        setStyles(_progress, {
+                            'width': Math.round(index / (params.frames - 1) * 100) + '%'
+                        });
+
                         index++;
                         if(index < _frames.length) {
                             loadNext(index);
@@ -164,7 +191,7 @@
 
         var createCanvas = function(el) {
             var canvas = document.createElement('canvas');
-            canvas.classList.add('flip-canvas');
+            canvas.classList.add('flipbook-canvas');
 
             el.appendChild(canvas);
 
