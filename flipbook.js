@@ -36,20 +36,46 @@
         var _previousFrame = -1;
         
         var init = function() {
-            setupDom();
-            setupStyles();
-            setupEvents();
-            loadFrames(function() {
-                _ready = true;
-                onResize();
-                drawFrame(0);
-                _container.removeChild(_loader);
+            var requiredParams = ['id', 'path','extension','frames'];
+            var invalidParams;
+
+            requiredParams.forEach(function(p) {
+                if(!params[p]) {
+                    invalidParams = p;
+                }
             });
+
+            // defaults
+            params.speed = params.speed || 0.5;
+
+            if (invalidParams) {
+                 error('invalid options, missing ' + invalidParams);
+             } else {
+                setupDom();
+                setupStyles();
+
+                loadFrames(function(err) {
+                    if (err) {
+                        error(error);
+                    } else {
+                        kickoff();
+                    }
+                    
+                });    
+            }
         };
 
 
 
         /*** setup ***/
+        var kickoff = function() {
+            _ready = true;
+            setupEvents();
+            onResize();
+            drawFrame(0);
+            _container.removeChild(_loader);
+        };
+
         var setupDom = function() {
             // get container
             _container = document.getElementById(params.id);
@@ -113,12 +139,22 @@
             var loadNext = function(index) {
                 var f = _frames[index];
                 loadImage(f, function(err, img) {
-                    f.img = img;
-                    index++;
-                    if(index < _frames.length) {
-                        loadNext(index);
+                    if (err) {
+                        cb('error loading image');
                     } else {
-                        cb();
+                        f.img = img;
+
+                        // get aspect ratio
+                        if(index === 0) {
+                            params.aspectRatio = Math.round(img.naturalWidth / img.naturalHeight * 1000) / 1000;
+                        }
+
+                        index++;
+                        if(index < _frames.length) {
+                            loadNext(index);
+                        } else {
+                            cb();
+                        }    
                     }
                 });
             };
@@ -296,6 +332,12 @@
                 || window.msRequestAnimationFrame
                 || function(callback) { return setTimeout(callback, 1000 / 60); };
         };
+
+        var error = function(msg) {
+            if(console && console.error) {
+                console.error('::flipbook:: ' + msg);
+            }
+        }
 
 
 

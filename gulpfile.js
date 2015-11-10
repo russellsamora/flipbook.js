@@ -15,7 +15,8 @@ gulp.task('default', function() {
 	});
 
 	// watch
-	gulp.watch(['flipbook.js', 'index.html'], browserSync.reload);
+	gulp.watch('flipbook.js', ['min']);
+	gulp.watch(['index.html', 'flipbook.min.js'], browserSync.reload);
 });
 
 gulp.task('min', function() {

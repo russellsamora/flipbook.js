@@ -25,7 +25,6 @@ or
 			path: 'frames/walk',
 			extension: 'jpg',
 			frames: 86,
-			aspectRatio: 1.52,
 			speed: 0.5
 		});
 	</script>
