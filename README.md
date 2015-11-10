@@ -30,7 +30,28 @@ or
 	</script>
 ```
 
-### Convert video
+## Options
+* **id** (required)
+	The id of the element where the flipbook will be inserted
+
+* **path** (required)
+	The relative path the directory where the images are
+
+* **extension** (required)
+	The type of image file *(png or jpg)*
+
+* **frames** (required)
+	Number of images in directory
+
+* **speed** (optional)
+	[0 to 1] How fast the scroll advances the frames (0: slow, 1: fast)
+
+* **cover** (option)
+	[True or false] If the flipbook should go full window height, and center-crop (like CSS's `background-size: cover`)
+
+
+### Helpful bits
+Convert a video to image sequnce with ffmpeg:
 
 ```ffmpeg -i input.mp4 -r 12 frames/%d.png ```
 

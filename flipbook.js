@@ -19,7 +19,8 @@
         var _canvas;
         var _ctx;
         var _loader;
-        var _progress;
+        var _loaderProgress;
+        var _loaderText;
 
         // position
         var _canvasWidth;
@@ -29,6 +30,12 @@
         var _graphicLeft;
         var _start;
         var _end;
+
+        // cover crop
+        var _naturalWidth;
+        var _naturalHeight;
+        var _aspectRatio;
+        var _crop = {};
             
         // misc
         var _ready;
@@ -46,12 +53,17 @@
                 }
             });
 
-            // defaults
-            params.speed = params.speed || 0.5;
-
             if (invalidParams) {
                  error('invalid options, missing ' + invalidParams);
              } else {
+                // defaults
+                params.speed = parseFloat(params.speed) || 0.5;
+                params.frames = parseInt(params.frames);
+                params.path = params.path.trim();
+                if (params.path.lastIndexOf('/') !== params.path.length - 1) {
+                    params.path += '/';
+                }
+                
                 setupDom();
                 setupStyles();
 
@@ -84,16 +96,15 @@
 
             _loader = document.createElement('div');
             _loader.classList.add('flipbook-loader');
-            _progress = document.createElement('div');
-            _progress.classList.add('flipbook-loader--progress');
+            _loaderProgress = document.createElement('div');
+            _loaderProgress.classList.add('flipbook-loader--progress');
             
-            var text = document.createElement('div');
-            text.classList.add('flipbook-loader--text');
-            text.innerText = 'Loading animation...';
-            setStyles(text, {'position': 'relative'});
+            _loaderText = document.createElement('div');
+            _loaderText.classList.add('flipbook-loader--text');
+            _loaderText.innerText = 'Loading animation...';
 
-            _loader.appendChild(_progress);
-            _loader.appendChild(text);
+            _loader.appendChild(_loaderProgress);
+            _loader.appendChild(_loaderText);
 
             _container.appendChild(_loader);
                 
@@ -121,7 +132,7 @@
                 'background': '#efefef'
             });
 
-            setStyles(_progress, {
+            setStyles(_loaderProgress, {
                 'position': 'absolute',
                 'z-index': 0,
                 'top': 0,
@@ -129,6 +140,9 @@
                 'width': 0,
                 'height': '100%',
                 'background': '#ddd'
+            });
+
+            setStyles(_loaderText, {'position': 'relative'
             });
 
             setStyles(_graphic, {
@@ -154,7 +168,7 @@
             _frames = [];
             for (var i = 0; i < params.frames; i++) {
                 _frames[i] = {
-                    src: params.path + '/' + (i + 1) + '.' + params.extension
+                    src: params.path + (i + 1) + '.' + params.extension
                 };
             }
 
@@ -168,11 +182,13 @@
 
                         // get aspect ratio
                         if(index === 0) {
-                            params.aspectRatio = Math.round(img.naturalWidth / img.naturalHeight * 1000) / 1000;
+                            _naturalWidth = img.naturalWidth;
+                            _naturalHeight = img.naturalHeight;
+                            _aspectRatio = Math.round( _naturalWidth / _naturalHeight  * 1000) / 1000;
                         }
 
                         // progress update
-                        setStyles(_progress, {
+                        setStyles(_loaderProgress, {
                             'width': Math.round(index / (params.frames - 1) * 100) + '%'
                         });
 
@@ -205,7 +221,30 @@
             
             /*** update graphic ***/
             _canvasWidth = _container.offsetWidth;
-            _canvasHeight = Math.floor(_canvasWidth / params.aspectRatio);
+                
+            // cover or keep aspect
+            if (params.cover) {
+                _canvasHeight = innerHeight;
+                var canvasRatio = _canvasWidth / _canvasHeight;
+
+                // if canvas is taller than original, must crop to cover
+                if (canvasRatio < _aspectRatio) {
+                    // take full canvas height and canvas ratio amount of width
+                    _crop.width = Math.floor(canvasRatio * _naturalHeight);
+                    _crop.height = _naturalHeight;
+                    _crop.offsetX = Math.floor((_naturalWidth - _crop.width) / 2);
+                    _crop.offsetY = 0;
+                } else {
+                    _crop.height = Math.floor(_naturalWidth / canvasRatio);
+                    _crop.width = _naturalWidth;
+                    _crop.offsetX = 0;
+                    _crop.offsetY = Math.floor((_naturalHeight - _crop.height) / 2);
+                }
+
+            } else {
+                _canvasHeight = Math.floor(_canvasWidth / _aspectRatio);    
+            }
+
             var canvasMargin = innerHeight - _canvasHeight; // total margin top + bottom of canvas
             _graphicH = _canvasHeight + canvasMargin;
 
@@ -323,7 +362,13 @@
 
         var drawFrame = function(index) {
             _ctx.clearRect(0, 0, _canvasWidth, _canvasHeight);
-            _ctx.drawImage(_frames[index].img, 0, 0, _canvasWidth, _canvasHeight);
+
+            if (params.cover) {
+                _ctx.drawImage(_frames[index].img, _crop.offsetX, _crop.offsetY, _crop.width, _crop.height, 0, 0, _canvasWidth, _canvasHeight);
+            } else {
+                _ctx.drawImage(_frames[index].img, 0, 0, _canvasWidth, _canvasHeight);
+            }
+            
         };
 
         
