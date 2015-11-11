@@ -17,7 +17,9 @@
         var _container;
         var _graphic;
         var _canvas;
-        var _ctx;
+        var _context;
+        var _offscreenCanvas;
+        var _offscreenContext;
 
         // position
         var _canvasWidth;
@@ -36,35 +38,20 @@
             
         // misc
         var _ready;
-        var _frames;
         var _ticking;
         var _previousFrame = -1;
         
         var init = function() {
-            var requiredParams = ['id', 'path','extension','frames'];
-            var invalidParams;
+            
+            var isInvalid = hasInvalidParams();
 
-            requiredParams.forEach(function(p) {
-                if(!params[p]) {
-                    invalidParams = p;
-                }
-            });
-
-            if (invalidParams) {
-                 error('invalid options, missing ' + invalidParams);
+            if (isInvalid) {
+                 error('invalid options, missing ' + isInvalid);
              } else {
-                // defaults
-                params.speed = parseFloat(params.speed) || 0.5;
-                params.frames = parseInt(params.frames);
-                params.path = params.path.trim();
-                if (params.path.lastIndexOf('/') !== params.path.length - 1) {
-                    params.path += '/';
-                }
-                
+                setupDefaultParams();
                 setupDom();
                 setupStyles();
-
-                loadFrames(function(err) {
+                loadImages(function(err) {
                     if (err) {
                         error(error);
                     } else {
@@ -75,8 +62,39 @@
         };
 
 
+        var hasInvalidParams = function() {
+            var isInvalid;
+            var requiredParams;
 
-        /*** setup ***/
+            if (params.sprite) {
+                requiredParams = ['id', 'path','extension', 'rows'];
+            } else {
+                requiredParams = ['id', 'path','extension', 'frames'];
+            }
+
+            requiredParams.forEach(function(p) {
+                if(!params[p]) {
+                    isInvalid = p;
+                }
+            });
+
+            return isInvalid;
+        };
+        
+        var setupDefaultParams = function() {
+            params.speed = parseFloat(params.speed) || 0.5;
+
+            if(params.sprite) {
+                params.count = params.rows.reduce(function(a, b) { return a + b; });
+            } else {
+                params.count = parseInt(params.count);
+            }
+            params.path = params.path.trim();
+            if (params.path.lastIndexOf('/') !== params.path.length - 1) {
+                params.path += '/';
+            }
+        };
+
         var kickoff = function() {
             if(params.loaded && typeof params.loaded === 'function') {
                 params.loaded();
@@ -97,7 +115,7 @@
             _graphic.classList.add('flipbook-graphic');
             _container.appendChild(_graphic);
             _canvas = createCanvas(_graphic);
-            _ctx = _canvas.getContext('2d');
+            _context = _canvas.getContext('2d');
         };
 
         var setupStyles = function() {
@@ -125,17 +143,21 @@
             window.addEventListener('scroll', onScroll, false);
         };
 
-        var loadFrames = function(cb) {
+        var loadImages = function(cb) {
+            // setup offscreen canvas
+            _offscreenCanvas = document.createElement('canvas');
+            _offscreenContext = _offscreenCanvas.getContext('2d');
+
+            
+            var numImages = params.sprite ? params.rows.length : numImages = params.count;
+
             // construct array of images
-            _frames = [];
-            for (var i = 0; i < params.frames; i++) {
-                _frames[i] = {
-                    src: params.path + (i + 1) + '.' + params.extension
-                };
-            }
+            var frames = createFrameData(numImages);
+
+            var yOffset = 0;
 
             var loadNext = function(index) {
-                var f = _frames[index];
+                var f = frames[index];
                 loadImage(f, function(err, img) {
                     if (err) {
                         cb('error loading image');
@@ -145,21 +167,29 @@
                         // get aspect ratio
                         if(index === 0) {
                             _naturalWidth = img.naturalWidth;
-                            _naturalHeight = img.naturalHeight;
-                            _aspectRatio = Math.round( _naturalWidth / _naturalHeight  * 1000) / 1000;
+                            _naturalHeight = img.naturalHeight / f.rows;
+                            _aspectRatio = Math.round(_naturalWidth / _naturalHeight  * 1000) / 1000;
+                            _offscreenCanvas.width = _naturalWidth;
+                            _offscreenCanvas.height = _naturalHeight * params.count;
+                        }
+
+                         // render each row image to offscreen canvas
+                        for(var j = 0; j < f.rows; j++) {
+                            _offscreenContext.drawImage(f.img, 0, j * _naturalHeight, _naturalWidth, _naturalHeight, 0, _naturalHeight * yOffset, _naturalWidth, _naturalHeight);
+                            yOffset++;
                         }
 
                         // fire progress update
                         if(params.progress && typeof params.progress === 'function') {
                             params.progress({
                                 frame: (index + 1), 
-                                total: params.frames,
-                                percent: Math.round(index / (params.frames - 1) * 100)
+                                total: params.count,
+                                percent: Math.round(index / (numImages - 1) * 100)
                             });
                         }
 
                         index++;
-                        if(index < _frames.length) {
+                        if(index < frames.length) {
                             loadNext(index);
                         } else {
                             cb();
@@ -169,6 +199,17 @@
             };
 
             loadNext(0);
+        };
+
+        var createFrameData = function(numImages) {
+            var frames = [];
+            for (var i = 0; i < numImages; i++) {
+                frames[i] = {
+                    src: params.path + (i + 1) + '.' + params.extension,
+                    rows: params.sprite ? params.rows[i] : 1
+                };
+            }
+            return frames;
         };
 
         var createCanvas = function(el) {
@@ -225,9 +266,6 @@
             _graphic.style.height = _graphicH + 'px';
             _graphic.style.width = _canvasWidth + 'px';
 
-            
-
-
 
             /*** update container ***/
             
@@ -235,9 +273,6 @@
             var factor = getFactor();
             _containerH = innerHeight * factor;
             _container.style.height =  _containerH + 'px';
-
-    
-
 
             
 
@@ -318,7 +353,7 @@
             // constrain to a real percent
             percent = Math.min(Math.max(percent, 0), 1);
             
-            var index = Math.floor(percent * (params.frames - 1));
+            var index = Math.floor(percent * (params.count - 1));
 
             if(redraw || _previousFrame !== index) {
                 _previousFrame = index;
@@ -327,14 +362,23 @@
         };
 
         var drawFrame = function(index) {
-            _ctx.clearRect(0, 0, _canvasWidth, _canvasHeight);
+            _context.clearRect(0, 0, _canvasWidth, _canvasHeight);
+
+            var sx, sy, sw, sh;
 
             if (params.cover) {
-                _ctx.drawImage(_frames[index].img, _crop.offsetX, _crop.offsetY, _crop.width, _crop.height, 0, 0, _canvasWidth, _canvasHeight);
+                sx = _crop.offsetX;
+                sy = _crop.offsetY + _naturalHeight * index;
+                sw = _crop.width;
+                sh = _crop.height;
             } else {
-                _ctx.drawImage(_frames[index].img, 0, 0, _canvasWidth, _canvasHeight);
+                sx = 0;
+                sy = _naturalHeight * index;
+                sw = _naturalWidth;
+                sy = _naturalHeight;
             }
             
+            _context.drawImage(_offscreenCanvas, sx, sy, sw, sh, 0, 0, _canvasWidth, _canvasHeight);
         };
 
         
