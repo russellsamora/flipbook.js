@@ -18,9 +18,6 @@
         var _graphic;
         var _canvas;
         var _ctx;
-        var _loader;
-        var _loaderProgress;
-        var _loaderText;
 
         // position
         var _canvasWidth;
@@ -73,7 +70,6 @@
                     } else {
                         kickoff();
                     }
-                    
                 });    
             }
         };
@@ -82,31 +78,19 @@
 
         /*** setup ***/
         var kickoff = function() {
+            if(params.loaded && typeof params.loaded === 'function') {
+                params.loaded();
+            }
             _ready = true;
             setupEvents();
             onResize();
             drawFrame(0);
-            _container.removeChild(_loader);
         };
 
         var setupDom = function() {
             // get container
             _container = document.getElementById(params.id);
             _container.classList.add('flipbook-container');
-
-            _loader = document.createElement('div');
-            _loader.classList.add('flipbook-loader');
-            _loaderProgress = document.createElement('div');
-            _loaderProgress.classList.add('flipbook-loader--progress');
-            
-            _loaderText = document.createElement('div');
-            _loaderText.classList.add('flipbook-loader--text');
-            _loaderText.innerText = 'Loading animation...';
-
-            _loader.appendChild(_loaderProgress);
-            _loader.appendChild(_loaderText);
-
-            _container.appendChild(_loader);
                 
             // create graphic container / canvas for drawing
             _graphic = document.createElement('div');
@@ -121,28 +105,6 @@
                 'position': 'relative',
                 'width': '100%',
                 'overflow': 'hidden'
-            });
-
-            setStyles(_loader, {
-                'position': 'relative',
-                'text-align': 'center',
-                'padding': '1em',
-                'font-family': 'sans-serif',
-                'color': '#666',
-                'background': '#efefef'
-            });
-
-            setStyles(_loaderProgress, {
-                'position': 'absolute',
-                'z-index': 0,
-                'top': 0,
-                'left': 0,
-                'width': 0,
-                'height': '100%',
-                'background': '#ddd'
-            });
-
-            setStyles(_loaderText, {'position': 'relative'
             });
 
             setStyles(_graphic, {
@@ -187,10 +149,14 @@
                             _aspectRatio = Math.round( _naturalWidth / _naturalHeight  * 1000) / 1000;
                         }
 
-                        // progress update
-                        setStyles(_loaderProgress, {
-                            'width': Math.round(index / (params.frames - 1) * 100) + '%'
-                        });
+                        // fire progress update
+                        if(params.progress && typeof params.progress === 'function') {
+                            params.progress({
+                                frame: (index + 1), 
+                                total: params.frames,
+                                percent: Math.round(index / (params.frames - 1) * 100)
+                            });
+                        }
 
                         index++;
                         if(index < _frames.length) {
@@ -409,9 +375,7 @@
             if(console && console.error) {
                 console.error('::flipbook:: ' + msg);
             }
-        }
-
-
+        };
 
         init();
     };

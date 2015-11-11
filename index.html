@@ -101,16 +101,22 @@
 				path: 'img/smokey/',
 				extension: 'jpg',
 				frames: 72,
-				speed: 0.8
+				speed: 0.8,
+				progress: function(data) {
+					console.log(data.percent);
+				},
+				loaded: function() {
+					console.log('loaded');
+				}
 			});
 
-			flipbook({
-				id: 'walk-cycle',
-				path: 'img/walk',
-				extension: 'jpg',
-				frames: 86,
-				speed: 0.5
-			});
+			// flipbook({
+			// 	id: 'walk-cycle',
+			// 	path: 'img/walk',
+			// 	extension: 'jpg',
+			// 	frames: 86,
+			// 	speed: 0.5
+			// });
 		</script>
 	</body>
 </html>
