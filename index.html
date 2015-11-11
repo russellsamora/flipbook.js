@@ -34,6 +34,20 @@
         	.description {
         		font-style: italic;
         	}
+
+        	.s-loader {
+        		postion: relative;
+        	}
+        	.s-loader--progress {
+        		width: 0;
+        		height: 2px;
+        		margin-top: 0.25em;
+        		background-color: #ccc;
+        	}
+        	.s-loader--text {
+        		color: #999;
+        		text-align: center;
+        	}
         </style>
 	</head>
 	<body>
@@ -49,7 +63,11 @@
 			<p>
 				Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
 			</p>
-			<div id='smokey-reveal'></div>
+			<div id='smokey'></div>
+			<div class='s-loader'>
+				<div class='s-loader--text'>Loading animation...</div>
+				<div class='s-loader--progress'></div>
+			</div>
 			<p>
 				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
 			</p>
@@ -96,17 +114,20 @@
 		</article>
 		<script src='flipbook.min.js'></script>
 		<script>
+			var progressEl = document.getElementsByClassName('s-loader--progress')[0];
+
 			flipbook({
-				id: 'smokey-reveal',
+				id: 'smokey',
 				path: 'img/smokey/',
 				extension: 'jpg',
 				frames: 72,
 				speed: 0.8,
 				progress: function(data) {
-					console.log(data.percent);
+					progressEl.style.width = data.percent + '%';
 				},
 				loaded: function() {
-					console.log('loaded');
+					var loaderEl = document.getElementsByClassName('s-loader')[0];
+					loaderEl.parentNode.removeChild(loaderEl);
 				}
 			});
 
