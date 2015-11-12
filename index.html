@@ -18,25 +18,31 @@
         		font-weight: 300;
         	}
         	article {
-        		max-width: 45em;
-        		width: 100%;
+        	}
+        	p {
+        		color: #333;
+        		font-size: 1.2em;
+        		line-height: 1.6;
+        		max-width: 40em;
         		padding: 1em;
         		margin: 0 auto;
         	}
-        	p {
-        		font-size: 1.2em;
-        		line-height: 1.6;
-        		color: #333;
-        	}
         	h1 {
         		font-weight: 300;
+        		margin: 1em;
+        		text-align: center;
         	}
-        	.description {
+        	p.description {
         		font-style: italic;
+        		font-size: 1em;
+        		text-align: center;
+        		max-width: 100%;
         	}
 
+
+
         	.s-loader {
-        		postion: relative;
+        		position: relative;
         	}
         	.s-loader--progress {
         		width: 0;
@@ -47,6 +53,15 @@
         	.s-loader--text {
         		color: #999;
         		text-align: center;
+        	}
+        	#stylish {
+        		margin: 2em 0;
+        	}
+        	#walk {
+        		font-size: 1.2em;
+        		max-width: 40em;
+        		padding: 1em;
+        		margin: 0 auto;	
         	}
         </style>
 	</head>
@@ -60,24 +75,19 @@
 			<p>
 				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
 			</p>
-			<div id='smokey'></div>
-			<div class='s-loader'>
-				<div class='s-loader--text'>Loading animation...</div>
-				<div class='s-loader--progress'></div>
-			</div>
 			<p>
 				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
 			</p>
 			<p>
 				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
 			</p>
+			<div id='stylish'></div>
 			<p>
 				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
 			</p>
 			<p>
 				Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
 			</p>
-			<div id='stylish'></div>
 			<p>
 				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
 			</p>
@@ -91,6 +101,10 @@
 				Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
 			</p>
 			<div id='walk'></div>
+			<div class='s-loader'>
+				<div class='s-loader--text'>Loading animation...</div>
+				<div class='s-loader--progress'></div>
+			</div>
 			<p>
 				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
 			</p>
@@ -112,49 +126,31 @@
 		</article>
 		<script src='flipbook.min.js'></script>
 		<script>
-			// var progressEl = document.getElementsByClassName('s-loader--progress')[0];
-
-			// flipbook({
-			// 	id: 'smokey',
-			// 	path: 'img/smokey/',
-			// 	extension: 'jpg',
-			// 	count: 72,
-			// 	speed: 0.8,
-			// 	progress: function(data) {
-			// 		progressEl.style.width = data.percent + '%';
-			// 	},
-			// 	loaded: function() {
-			// 		var loaderEl = document.getElementsByClassName('s-loader')[0];
-			// 		loaderEl.parentNode.removeChild(loaderEl);
-			// 	}
-			// });
-
 			flipbook({
 				id: 'stylish',
 				path: 'img/stylish/',
 				extension: 'jpg',
 				sprite: true,
 				rows: [5, 5, 5, 5],
-				speed: 0.8,
-				cover: true,
-				progress: function(data) {
-					// console.log(data);
-					// progressEl.style.width = data.percent + '%';
-				},
-				loaded: function() {
-					// console.log('loaded');
-					// var loaderEl = document.getElementsByClassName('s-loader')[0];
-					// loaderEl.parentNode.removeChild(loaderEl);
-				}
+				speed: 1,
+				cover: true
 			});
 
-			// flipbook({
-			// 	id: 'walk',
-			// 	path: 'img/walk',
-			// 	extension: 'jpg',
-			// 	frames: 86,
-			// 	speed: 0.5
-			// });
+			var progressEl = document.getElementsByClassName('s-loader--progress')[0];
+			flipbook({
+				id: 'walk',
+				path: 'img/walk',
+				extension: 'jpg',
+				count: 86,
+				speed: 0.5,
+				progress: function(data) {
+					progressEl.style.width = data.percent + '%';
+				},
+				loaded: function() {
+					var loaderEl = document.getElementsByClassName('s-loader')[0];
+					loaderEl.parentNode.removeChild(loaderEl);
+				}
+			});
 		</script>
 	</body>
 </html>

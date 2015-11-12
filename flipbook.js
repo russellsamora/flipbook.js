@@ -12,14 +12,12 @@
     }
 })(function() {
 
-    var lib = function(params) {
+    var lib = function(opts) {
         // dom
         var _container;
         var _graphic;
         var _canvas;
         var _context;
-        var _offscreenCanvas;
-        var _offscreenContext;
 
         // position
         var _canvasWidth;
@@ -37,6 +35,8 @@
         var _crop = {};
             
         // misc
+        var _images;
+        var _frames;
         var _ready;
         var _ticking;
         var _previousFrame = -1;
@@ -66,14 +66,14 @@
             var isInvalid;
             var requiredParams;
 
-            if (params.sprite) {
+            if (opts.sprite) {
                 requiredParams = ['id', 'path','extension', 'rows'];
             } else {
-                requiredParams = ['id', 'path','extension', 'frames'];
+                requiredParams = ['id', 'path','extension', 'count'];
             }
 
             requiredParams.forEach(function(p) {
-                if(!params[p]) {
+                if(!opts[p]) {
                     isInvalid = p;
                 }
             });
@@ -82,32 +82,32 @@
         };
         
         var setupDefaultParams = function() {
-            params.speed = parseFloat(params.speed) || 0.5;
+            opts.speed = isNaN(opts.speed) ? 0.5 : Math.min(Math.max(0, parseFloat(opts.speed)), 1);
 
-            if(params.sprite) {
-                params.count = params.rows.reduce(function(a, b) { return a + b; });
+            if(opts.sprite) {
+                opts.count = opts.rows.reduce(function(a, b) { return a + b; });
             } else {
-                params.count = parseInt(params.count);
+                opts.count = parseInt(opts.count);
             }
-            params.path = params.path.trim();
-            if (params.path.lastIndexOf('/') !== params.path.length - 1) {
-                params.path += '/';
+            opts.path = opts.path.trim();
+            if (opts.path.lastIndexOf('/') !== opts.path.length - 1) {
+                opts.path += '/';
             }
         };
 
         var kickoff = function() {
-            if(params.loaded && typeof params.loaded === 'function') {
-                params.loaded();
+            if(opts.loaded && typeof opts.loaded === 'function') {
+                opts.loaded();
             }
             _ready = true;
-            setupEvents();
             onResize();
+            setupEvents();
             drawFrame(0);
         };
 
         var setupDom = function() {
             // get container
-            _container = document.getElementById(params.id);
+            _container = document.getElementById(opts.id);
             _container.classList.add('flipbook-container');
                 
             // create graphic container / canvas for drawing
@@ -144,72 +144,76 @@
         };
 
         var loadImages = function(cb) {
-            // setup offscreen canvas
-            _offscreenCanvas = document.createElement('canvas');
-            _offscreenContext = _offscreenCanvas.getContext('2d');
-
-            
-            var numImages = params.sprite ? params.rows.length : numImages = params.count;
+            var numImages = opts.sprite ? opts.rows.length : numImages = opts.count;
 
             // construct array of images
-            var frames = createFrameData(numImages);
+            _images = createImageData(numImages);
+            _frames = [];
 
-            var yOffset = 0;
-
-            var loadNext = function(index) {
-                var f = frames[index];
-                loadImage(f, function(err, img) {
-                    if (err) {
-                        cb('error loading image');
-                    } else {
-                        f.img = img;
-
-                        // get aspect ratio
-                        if(index === 0) {
-                            _naturalWidth = img.naturalWidth;
-                            _naturalHeight = img.naturalHeight / f.rows;
-                            _aspectRatio = Math.round(_naturalWidth / _naturalHeight  * 1000) / 1000;
-                            _offscreenCanvas.width = _naturalWidth;
-                            _offscreenCanvas.height = _naturalHeight * params.count;
-                        }
-
-                         // render each row image to offscreen canvas
-                        for(var j = 0; j < f.rows; j++) {
-                            _offscreenContext.drawImage(f.img, 0, j * _naturalHeight, _naturalWidth, _naturalHeight, 0, _naturalHeight * yOffset, _naturalWidth, _naturalHeight);
-                            yOffset++;
-                        }
-
-                        // fire progress update
-                        if(params.progress && typeof params.progress === 'function') {
-                            params.progress({
-                                frame: (index + 1), 
-                                total: params.count,
-                                percent: Math.round(index / (numImages - 1) * 100)
-                            });
-                        }
-
-                        index++;
-                        if(index < frames.length) {
-                            loadNext(index);
-                        } else {
-                            cb();
-                        }    
-                    }
-                });
-            };
-
-            loadNext(0);
+            // start loading images
+            loadNextImage(0, numImages, cb);
         };
 
-        var createFrameData = function(numImages) {
-            var frames = [];
+        var loadNextImage = function(index, numImages, cb) {
+            var image = _images[index];
+            loadImage(image, function(err, img) {
+                if (err) {
+                    cb('error loading image');
+                } else {
+                    image.img = img;
+
+                    // set aspect ratio and offscreen canvas sizes
+                    if(index === 0) {
+                        setFrameSizes(img, image.rows);
+                    }
+
+                    for (var j = 0; j < image.rows; j++) {;
+                        _frames.push({
+                            imageIndex: index,
+                            x: 0,
+                            y: j
+                        }); 
+                    }
+
+                    // fire progress update
+                    updateProgress(index, numImages);
+
+                    index++;
+                    
+                    if(index < _images.length) {
+                        loadNextImage(index, numImages, cb);
+                    } else {
+                        cb();
+                    }    
+                }
+            });
+        };
+
+        var setFrameSizes = function(img, rows) {
+            _naturalWidth = img.naturalWidth;
+            _naturalHeight = img.naturalHeight / rows;
+            _aspectRatio = Math.round(_naturalWidth / _naturalHeight  * 1000) / 1000;
+        };
+
+        var updateProgress = function(index, numImages) {
+            if(opts.progress && typeof opts.progress === 'function') {
+                opts.progress({
+                    frame: (index + 1), 
+                    total: opts.count,
+                    percent: Math.round(index / (numImages - 1) * 100)
+                });
+            }
+        };
+
+        var createImageData = function(numImages) {
+            var images = [];
             for (var i = 0; i < numImages; i++) {
-                frames[i] = {
-                    src: params.path + (i + 1) + '.' + params.extension,
-                    rows: params.sprite ? params.rows[i] : 1
+                images[i] = {
+                    src: opts.path + (i + 1) + '.' + opts.extension,
+                    rows: opts.sprite ? opts.rows[i] : 1
                 };
             }
-            return frames;
+            return images;
         };
 
         var createCanvas = function(el) {
@@ -230,7 +234,7 @@
             _canvasWidth = _container.offsetWidth;
                 
             // cover or keep aspect
-            if (params.cover) {
+            if (opts.cover) {
                 _canvasHeight = innerHeight;
                 var canvasRatio = _canvasWidth / _canvasHeight;
 
@@ -273,7 +277,6 @@
             var factor = getFactor();
             _containerH = innerHeight * factor;
             _container.style.height =  _containerH + 'px';
-
             
 
             // grab updated dimensions
@@ -353,7 +356,7 @@
             // constrain to a real percent
             percent = Math.min(Math.max(percent, 0), 1);
             
-            var index = Math.floor(percent * (params.count - 1));
+            var index = Math.floor(percent * (opts.count - 1));
 
             if(redraw || _previousFrame !== index) {
                 _previousFrame = index;
@@ -366,26 +369,29 @@
 
             var sx, sy, sw, sh;
 
-            if (params.cover) {
+            var frame = _frames[index];
+            var image = _images[frame.imageIndex];
+
+            if (opts.cover) {
                 sx = _crop.offsetX;
-                sy = _crop.offsetY + _naturalHeight * index;
+                sy = _crop.offsetY + _naturalHeight * frame.y;
                 sw = _crop.width;
                 sh = _crop.height;
             } else {
                 sx = 0;
-                sy = _naturalHeight * index;
+                sy = _naturalHeight * frame.y;
                 sw = _naturalWidth;
-                sy = _naturalHeight;
+                sh = _naturalHeight;
             }
-            
-            _context.drawImage(_offscreenCanvas, sx, sy, sw, sh, 0, 0, _canvasWidth, _canvasHeight);
+
+            _context.drawImage(image.img, sx, sy, sw, sh, 0, 0, _canvasWidth, _canvasHeight);
         };
 
         
 
         /*** helpers ***/
         var setStyles = function(el, attrs) {
-            for(var prop in attrs) {
+            for (var prop in attrs) {
                 el.style[prop] = attrs[prop];
             }
         };
@@ -393,7 +399,7 @@
         var getFactor = function() {
             var multiplier = 10;
             var min = 2;
-            return min + multiplier * (1 - params.speed);
+            return min + multiplier * (1 - opts.speed);
         };
 
         var loadImage = function(f, cb) {
