@@ -42,7 +42,8 @@
         var _previousFrame = -1;
         
         var init = function() {
-            
+            window.requestAnimatoinFrame = raf();
+
             var isInvalid = hasInvalidParams();
 
             if (isInvalid) {
