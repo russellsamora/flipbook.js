@@ -40,9 +40,12 @@
         var _ready;
         var _ticking;
         var _previousFrame = -1;
+        var _mobile;
         
         var init = function() {
             window.requestAnimatoinFrame = raf();
+
+            _mobile = mobile();
 
             var isInvalid = hasInvalidParams();
 
@@ -104,6 +107,11 @@
             onResize();
             setupEvents();
             drawFrame(0);
+
+            // loop
+            if(_mobile) {
+                loopFrames();
+            }
         };
 
         var setupDom = function() {
@@ -141,7 +149,9 @@
 
         var setupEvents = function() {
             window.addEventListener('resize', onResize, false);
-            window.addEventListener('scroll', onScroll, false);
+            if(!_mobile) {
+                window.addEventListener('scroll', onScroll, false);    
+            }
         };
 
         var loadImages = function(cb) {
@@ -228,6 +238,27 @@
 
 
 
+        var loopFrames = function() {
+            var len = _frames.length;
+            var cur = 0;
+            var delay = 500;
+
+            var advance = function() {
+                drawFrame(cur);
+                cur++;
+                if(cur >= len) {
+                    cur = 0;
+                }
+
+                // TODO optimize
+                setTimeout(advance, delay - (opts.speed * delay * 0.9));
+                
+            };
+
+            advance();
+        };
+
+
         /*** update ***/
         var onResize = function() {
             
@@ -257,7 +288,13 @@
                 _canvasHeight = Math.floor(_canvasWidth / _aspectRatio);    
             }
 
-            var canvasMargin = innerHeight - _canvasHeight; // total margin top + bottom of canvas
+            var canvasMargin;
+            if(_mobile) {
+                canvasMargin = 20;
+            } else {
+                canvasMargin = innerHeight - _canvasHeight; // total margin top + bottom of canvas
+            }
+
             _graphicH = _canvasHeight + canvasMargin;
 
             // canvas resize
@@ -276,7 +313,13 @@
             
             // container resize
             var factor = getFactor();
-            _containerH = innerHeight * factor;
+
+            if(_mobile) {
+                _containerH = _graphicH;
+            } else {
+                _containerH = innerHeight * factor;    
+            }
+            
             _container.style.height =  _containerH + 'px';
             
 
@@ -290,15 +333,13 @@
             _start = containerBB.top + pageYOffset;
             _end = containerBB.bottom + pageYOffset - _graphic.offsetHeight;
 
-            updateScroll();
-            updateFrame(pageYOffset - _start, true); // force redraw
+            if(!_mobile) {
+                updateScroll();
+                updateFrame(pageYOffset - _start, true); // force redraw    
+            }
         };
 
         var onScroll = function() {
-            requestTick();
-        };
-
-        var requestTick = function() {
             if (!_ticking) {
                 requestAnimationFrame(updateScroll);
             }
@@ -397,7 +438,7 @@
             }
         };
 
-        var getFactor = function() {
+        var getFactor = function() {            
             var multiplier = 10;
             var min = 2;
             return min + multiplier * (1 - opts.speed);
@@ -420,6 +461,24 @@
                 || window.mozRequestAnimationFrame
                 || window.msRequestAnimationFrame
                 || function(callback) { return setTimeout(callback, 1000 / 60); };
+        };
+
+        var mobile = function() {
+            var isMobile = {
+                Android: function() { return navigator.userAgent.match(/Android/i); },
+
+                BlackBerry: function() { return navigator.userAgent.match(/BlackBerry/i); },
+
+                iOS: function() { return navigator.userAgent.match(/iPhone|iPad|iPod/i); },
+
+                Opera: function() { return navigator.userAgent.match(/Opera Mini/i); },
+
+                Windows: function() { return navigator.userAgent.match(/IEMobile/i); },
+
+                any: function() { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows()); }
+            };
+
+            return isMobile.any();
         };
 
         var error = function(msg) {
