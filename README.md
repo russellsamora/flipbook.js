@@ -23,7 +23,7 @@ or
 			id: 'walk-cycle',
 			path: 'frames/walk',
 			extension: 'jpg',
-			frames: 86,
+			count: 86,
 			speed: 0.5
 		});
 	</script>
@@ -42,7 +42,7 @@ or
 * **extension** (required)
 	[String] The type of image file *(png or jpg)*
 
-* **frames** (required)
+* **count** (required)
 	[Number] Count of images in directory
 
 * **speed** (optional)
