@@ -1,6 +1,6 @@
 {
   "name": "flipbook",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Scroll-based inline flipbook animation for the internet.",
   "main": "flipbook.js",
   "scripts": {
