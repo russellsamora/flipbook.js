@@ -57,7 +57,7 @@
                 setupStyles();
                 loadImages(function(err) {
                     if (err) {
-                        error(error);
+                        error(err);
                     } else {
                         kickoff();
                     }
@@ -71,13 +71,13 @@
             var requiredParams;
 
             if (opts.sprite) {
-                requiredParams = ['id', 'path','extension', 'rows'];
+                requiredParams = ['id', 'path','extension', 'filename', 'rows'];
             } else {
-                requiredParams = ['id', 'path','extension', 'count'];
+                requiredParams = ['id', 'path','extension', 'filename', 'count'];
             }
 
             requiredParams.forEach(function(p) {
-                if(!opts[p]) {
+                if (!opts[p]) {
                     isInvalid = p;
                 }
             });
@@ -88,7 +88,7 @@
         var setupDefaultParams = function() {
             opts.speed = isNaN(opts.speed) ? 0.5 : Math.min(Math.max(0, parseFloat(opts.speed)), 1);
 
-            if(opts.sprite) {
+            if (opts.sprite) {
                 opts.count = opts.rows.reduce(function(a, b) { return a + b; });
             } else {
                 opts.count = parseInt(opts.count);
@@ -100,7 +100,7 @@
         };
 
         var kickoff = function() {
-            if(opts.loaded && typeof opts.loaded === 'function') {
+            if (opts.loaded && typeof opts.loaded === 'function') {
                 opts.loaded();
             }
             _ready = true;
@@ -109,7 +109,7 @@
             drawFrame(0);
 
             // loop
-            if(_mobile) {
+            if (_mobile) {
                 loopFrames();
             }
         };
@@ -149,7 +149,7 @@
 
         var setupEvents = function() {
             window.addEventListener('resize', onResize, false);
-            if(!_mobile) {
+            if (!_mobile) {
                 window.addEventListener('scroll', onScroll, false);    
             }
         };
@@ -174,7 +174,7 @@
                     image.img = img;
 
                     // set aspect ratio and offscreen canvas sizes
-                    if(index === 0) {
+                    if (index === 0) {
                         setFrameSizes(img, image.rows);
                     }
 
@@ -191,7 +191,7 @@
 
                     index++;
                     
-                    if(index < _images.length) {
+                    if (index < _images.length) {
                         loadNextImage(index, numImages, cb);
                     } else {
                         cb();
@@ -207,7 +207,7 @@
         };
 
         var updateProgress = function(index, numImages) {
-            if(opts.progress && typeof opts.progress === 'function') {
+            if (opts.progress && typeof opts.progress === 'function') {
                 opts.progress({
                     frame: (index + 1), 
                     total: opts.count,
@@ -219,12 +219,31 @@
         var createImageData = function(numImages) {
             var images = [];
             for (var i = 0; i < numImages; i++) {
+
+                var src = createImageSrc(i + 1);
                 images[i] = {
-                    src: opts.path + (i + 1) + '.' + opts.extension,
+                    src: src,
                     rows: opts.sprite ? opts.rows[i] : 1
                 };
             }
             return images;
+        };
+
+        var createImageSrc = function(index) {
+            var match = opts.filename.match(/\%\dd/);
+            var total = match[0].charAt(1);
+            var len = index.toString().length;
+            var toAdd = Math.max(total - len, 0);
+            var name = opts.filename.split(/\%\dd/)[0];
+
+            var src = opts.path + name;
+
+            for (var i = 0; i < toAdd; i++) {
+                src += '0';
+            } 
+
+            src += index + '.' + opts.extension;
+            return src;
         };
 
         var createCanvas = function(el) {
@@ -246,7 +265,7 @@
             var advance = function() {
                 drawFrame(cur);
                 cur++;
-                if(cur >= len) {
+                if (cur >= len) {
                     cur = 0;
                 }
 
@@ -289,7 +308,7 @@
             }
 
             var canvasMargin;
-            if(_mobile) {
+            if (_mobile) {
                 canvasMargin = 20;
             } else {
                 canvasMargin = innerHeight - _canvasHeight; // total margin top + bottom of canvas
@@ -314,7 +333,7 @@
             // container resize
             var factor = getFactor();
 
-            if(_mobile) {
+            if (_mobile) {
                 _containerH = _graphicH;
             } else {
                 _containerH = innerHeight * factor;    
@@ -333,7 +352,7 @@
             _start = containerBB.top + pageYOffset;
             _end = containerBB.bottom + pageYOffset - _graphic.offsetHeight;
 
-            if(!_mobile) {
+            if (!_mobile) {
                 updateScroll();
                 updateFrame(pageYOffset - _start, true); // force redraw    
             }
@@ -351,7 +370,6 @@
             if (_ready) {
                 var top = pageYOffset - _start;
                 var bottom = pageYOffset - _end;
-
                 // TODO optimize
                 if (top > 0 && bottom < 0) {
                     // we're in
@@ -375,7 +393,7 @@
 
                     updateFrame(_containerH);
 
-                } else if(top < 0) {
+                } else if (top < 0) {
                     // above
                     setStyles(_graphic, {
                         'position': 'absolute',
@@ -400,7 +418,7 @@
             
             var index = Math.floor(percent * (opts.count - 1));
 
-            if(redraw || _previousFrame !== index) {
+            if (redraw || _previousFrame !== index) {
                 _previousFrame = index;
                 drawFrame(index);
             }
@@ -482,7 +500,7 @@
         };
 
         var error = function(msg) {
-            if(console && console.error) {
+            if (console && console.error) {
                 console.error('::flipbook:: ' + msg);
             }
         };

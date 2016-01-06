@@ -48,11 +48,15 @@
         		width: 0;
         		height: 2px;
         		margin-top: 0.25em;
+        		margin-bottom: 2em;
         		background-color: #ccc;
         	}
         	.s-loader--text {
         		color: #999;
         		text-align: center;
+        	}
+        	#snowboard {
+        		margin: 2em 0;
         	}
         	#stylish {
         		margin: 2em 0;
@@ -75,19 +79,11 @@
 			<p>
 				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
 			</p>
-			<p>
-				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
-			</p>
-			<p>
-				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
-			</p>
-			<div id='stylish'></div>
-			<p>
-				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
-			</p>
-			<p>
-				Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
-			</p>
+			<div id='snowboard'></div>
+			<div class='s-loader'>
+				<div class='s-loader--text'>Loading animation...</div>
+				<div class='s-loader--progress'></div>
+			</div>
 			<p>
 				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
 			</p>
@@ -101,10 +97,19 @@
 				Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
 			</p>
 			<div id='walk'></div>
-			<div class='s-loader'>
-				<div class='s-loader--text'>Loading animation...</div>
-				<div class='s-loader--progress'></div>
-			</div>
+			<p>
+				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
+			</p>
+			<p>
+				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
+			</p>
+			<p>
+				Gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato. Dandelion cucumber earthnut pea peanut soko zucchini.
+			</p>
+			<p>
+				Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.
+			</p>
+			<!-- <div id='stylish'></div> -->
 			<p>
 				Veggies es bonus vobis, proinde vos postulo essum magis kohlrabi welsh onion daikon amaranth tatsoi tomatillo melon azuki bean garlic.
 			</p>
@@ -126,23 +131,16 @@
 		</article>
 		<script src='flipbook.min.js'></script>
 		<script>
-			flipbook({
-				id: 'stylish',
-				path: 'img/stylish/',
-				extension: 'jpg',
-				sprite: true,
-				rows: [5, 5, 5, 5],
-				speed: 1,
-				cover: true
-			});
-
 			var progressEl = document.getElementsByClassName('s-loader--progress')[0];
+
 			flipbook({
-				id: 'walk',
-				path: 'img/walk',
+				id: 'snowboard',
+				path: 'img/snowboard/',
+				filename: '%3d',
 				extension: 'jpg',
-				count: 86,
-				speed: 0.5,
+				count: 42,
+				speed: 0.8,
+				cover: true,
 				progress: function(data) {
 					progressEl.style.width = data.percent + '%';
 				},
@@ -151,6 +149,26 @@
 					loaderEl.parentNode.removeChild(loaderEl);
 				}
 			});
+			
+			flipbook({
+				id: 'walk',
+				path: 'img/walk',
+				filename: '%1d',
+				extension: 'jpg',
+				count: 86,
+				speed: 0.5,
+			});
+
+			// flipbook({
+			// 	id: 'stylish',
+			// 	path: 'img/stylish/',
+			// 	filename: '%1d',
+			// 	extension: 'jpg',
+			// 	sprite: true,
+			// 	rows: [5, 5, 5, 5],
+			// 	speed: 1,
+			// 	cover: true
+			// });
 		</script>
 	</body>
 </html>

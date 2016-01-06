@@ -19,7 +19,6 @@ or
 	<div id='walk-cycle'></div>
 
 	<script>
-		// instantiate the flipbook
 		flipbook({
 			id: 'walk-cycle',
 			path: 'frames/walk',
@@ -32,26 +31,32 @@ or
 
 ## Options
 * **id** (required)
-	The id of the element where the flipbook will be inserted
+	[String] The id of the element where the flipbook will be inserted
 
 * **path** (required)
-	The relative path the directory where the images are
+	[String] The relative path the directory where the images are
+
+* **filename** (required)
+	[String] The pattern of filename (*%3d* = 3 digits or 001, 002, etc, ex. 'images-%3d')
 
 * **extension** (required)
-	The type of image file *(png or jpg)*
+	[String] The type of image file *(png or jpg)*
 
 * **frames** (required)
-	Number of images in directory
+	[Number] Count of images in directory
 
 * **speed** (optional)
-	[0 to 1] How fast the scroll advances the frames (0: slow, 1: fast)
+	[0 to 1] How fast the scroll advances the frames (0: slow, 1: fast). Defaults to 0.5.
 
-* **cover** (option)
-	[True or false] If the flipbook should go full window height, and center-crop (like CSS's `background-size: cover`)
+* **cover** (optional)
+	[True or false] If the flipbook should go full window height, and center-crop (like CSS's `background-size: cover`). Defaults to false.
+
+* **loaded** (optional)
+	[Function] Callback function when the flipbook has loaded all images and is ready to play through. Defaults to none.
 
 
 ### Helpful bits
-Convert a video to image sequnce with ffmpeg:
+Convert a video to image sequence with ffmpeg:
 
 ```ffmpeg -i input.mp4 -r 12 frames/%d.png ```
 
