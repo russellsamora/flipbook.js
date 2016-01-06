@@ -31,28 +31,31 @@ or
 
 ## Options
 * **id** (required)
-	[String] The id of the element where the flipbook will be inserted
+	[String] The id of the element where the flipbook will be inserted.
 
 * **path** (required)
-	[String] The relative path the directory where the images are
+	[String] The relative path the directory where the images are.
 
 * **filename** (required)
-	[String] The pattern of filename (*%3d* = 3 digits or 001, 002, etc, ex. 'images-%3d')
+	[String] The pattern of filename (*%3d* = 3 digits or 001, 002, etc, ex. 'images-%3d').
 
 * **extension** (required)
-	[String] The type of image file *(png or jpg)*
+	[String] The type of image file *(png or jpg)*.
 
 * **count** (required)
-	[Number] Count of images in directory
+	[Number] Count of images in directory.
 
 * **speed** (optional)
-	[0 to 1] How fast the scroll advances the frames (0: slow, 1: fast). Defaults to 0.5.
+	[Number 0 to 1] How fast the scroll advances the frames (0: slow, 1: fast). Defaults to 0.5.
 
 * **cover** (optional)
-	[True or false] If the flipbook should go full window height, and center-crop (like CSS's `background-size: cover`). Defaults to false.
+	[Boolean] If the flipbook should go full window height, and center-crop (like CSS's `background-size: cover`). Defaults to false.
 
 * **loaded** (optional)
 	[Function] Callback function when the flipbook has loaded all images and is ready to play through. Defaults to none.
+
+* **gif** (optional)
+	[Boolean] Autoplay the animation and loop like a gif without scroll interaction.
 
 
 ### Helpful bits

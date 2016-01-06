@@ -45,8 +45,6 @@
         var init = function() {
             window.requestAnimatoinFrame = raf();
 
-            _mobile = mobile();
-
             var isInvalid = hasInvalidParams();
 
             if (isInvalid) {
@@ -93,10 +91,13 @@
             } else {
                 opts.count = parseInt(opts.count);
             }
+            
             opts.path = opts.path.trim();
             if (opts.path.lastIndexOf('/') !== opts.path.length - 1) {
                 opts.path += '/';
             }
+
+            _mobile = mobile() || opts.gif;
         };
 
         var kickoff = function() {
