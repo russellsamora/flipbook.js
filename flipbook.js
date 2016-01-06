@@ -341,7 +341,15 @@
             
             _container.style.height =  _containerH + 'px';
             
+            setTriggerPoints();
 
+            if (!_mobile && _start) {
+                updateScroll();
+                updateFrame(pageYOffset - _start, true); // force redraw    
+            }
+        };
+
+        var setTriggerPoints = function() {
             // grab updated dimensions
             var containerBB = _container.getBoundingClientRect();
 
@@ -349,14 +357,10 @@
             _graphicLeft = containerBB.left;
 
             // scroll pos values where graphic should start and stop
-            _start = containerBB.top + pageYOffset;
-            _end = containerBB.bottom + pageYOffset - _graphic.offsetHeight;
-
-            if (!_mobile) {
-                updateScroll();
-                updateFrame(pageYOffset - _start, true); // force redraw    
-            }
+            _start = containerBB.top;
+            _end = containerBB.bottom - _graphic.offsetHeight;
         };
+
 
         var onScroll = function() {
             if (!_ticking) {
@@ -368,10 +372,11 @@
         var updateScroll = function() {
             _ticking = false;
             if (_ready) {
-                var top = pageYOffset - _start;
-                var bottom = pageYOffset - _end;
+                
+                setTriggerPoints();
+
                 // TODO optimize
-                if (top > 0 && bottom < 0) {
+                if (_start < 0 && _end > 0) {
                     // we're in
                     setStyles(_graphic, {
                         'position': 'fixed',
@@ -380,9 +385,9 @@
                         'bottom': 'auto'
                     });
 
-                    updateFrame(top);
+                    updateFrame(Math.abs(_start));
 
-                } else if (bottom > 0) {
+                } else if (_end < 0) {
                     // below
                     setStyles(_graphic, {
                         'position': 'absolute',
@@ -393,7 +398,7 @@
 
                     updateFrame(_containerH);
 
-                } else if (top < 0) {
+                } else if (_start > 0) {
                     // above
                     setStyles(_graphic, {
                         'position': 'absolute',
