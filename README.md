@@ -22,6 +22,7 @@ or
 		flipbook({
 			id: 'walk-cycle',
 			path: 'frames/walk',
+			filename: '%1d',
 			extension: 'jpg',
 			count: 86,
 			speed: 0.5
