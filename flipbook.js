@@ -260,7 +260,6 @@
         var loopFrames = function() {
             var len = _frames.length;
             var cur = 0;
-            var delay = 500;
 
             var advance = function() {
                 drawFrame(cur);
@@ -270,7 +269,7 @@
                 }
 
                 // TODO optimize
-                setTimeout(advance, delay - (opts.speed * delay * 0.9));
+                setTimeout(advance, 60);
                 
             };
 
@@ -284,8 +283,8 @@
             /*** update graphic ***/
             _canvasWidth = _container.offsetWidth;
                 
-            // cover or keep aspect
-            if (opts.cover) {
+            // cover or keep aspect only on desktop
+            if (opts.cover && !_mobile) {
                 _canvasHeight = innerHeight;
                 var canvasRatio = _canvasWidth / _canvasHeight;
 
@@ -437,7 +436,7 @@
             var frame = _frames[index];
             var image = _images[frame.imageIndex];
 
-            if (opts.cover) {
+            if (opts.cover && !_mobile) {
                 sx = _crop.offsetX;
                 sy = _crop.offsetY + _naturalHeight * frame.y;
                 sw = _crop.width;
